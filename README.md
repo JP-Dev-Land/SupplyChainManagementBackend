@@ -17,7 +17,7 @@ cd SupplyChainManagementBackend
 
 ## 🐘 PostgreSQL Setup
 
-Follow the instructions in [`DB_Config.md`](./[DB_Config.md](./backend/DB_Config.md)) to install and configure PostgreSQL on your machine.
+Follow the instructions in [`DB_Config.md`](./backend/DB_Config.md) to install and configure PostgreSQL on your machine.
 
 ---
 
