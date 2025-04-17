@@ -1,188 +1,74 @@
-### 1. PostgreSQL Setup
+# PostgreSQL Setup Guide for Supply Chain Management Project
 
-1. **Install & Start**
+This guide outlines the one-time setup process for configuring PostgreSQL for the Supply Chain Management project.
 
-    ```bash
-    sudo apt update
-    sudo apt install postgresql postgresql-contrib
-    sudo systemctl enable postgresql
-    sudo systemctl start postgresql
-    
-    ```
+---
 
-2. **Create Database & User**
+## 1. Install and Start PostgreSQL
 
-    ```sql
-    -- Drop the database and role if they already exist
-    DROP DATABASE IF EXISTS supply_chain_mgmt;
-    DROP ROLE IF EXISTS supply_chain_user;
-    
-    -- Create the new user with a password
-    CREATE USER supply_chain_user WITH PASSWORD 'password';
-    
-    -- Create the new database and assign ownership to the new user
-    CREATE DATABASE supply_chain_mgmt OWNER supply_chain_user;
-    
-    -- Connect to the new database
-    \c supply_chain_mgmt
-    
-    -- Grant usage and create privileges on the public schema
-    GRANT USAGE, CREATE ON SCHEMA public TO supply_chain_user;
-    
-    -- Grant privileges on all existing tables, sequences, and functions in the schema
-    GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO supply_chain_user;
-    GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO supply_chain_user;
-    GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO supply_chain_user;
-    
-    -- Grant privileges on future tables, sequences, and functions created in the schema
-    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO supply_chain_user;
-    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON SEQUENCES TO supply_chain_user;
-    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON FUNCTIONS TO supply_chain_user;
-    
-    -- Exit the session
-    \q
-    ```
+Run the following commands to install and start the PostgreSQL service:
 
-
-### 2. Type‑Safe Configuration with `@ConfigurationProperties`
-
-Spring’s `@ConfigurationProperties` binds your YAML/ENV vars into **strongly‑typed** Java beans at startup—catching typos and missing keys at compile time
-
-1. **Add to `pom.xml`**
-
-    ```xml
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-configuration-processor</artifactId>
-      <optional>true</optional>
-    </dependency>
-    
-    ```
-
-2. **Define `AppProperties`**
-
-    ```java
-    @ConfigurationProperties(prefix = "app")
-    @Data
-    public class AppProperties {
-      private String jwtSecret;
-      private final Database db = new Database();
-      @Data
-      public static class Database {
-        private String url;
-        private String username;
-        private String password;
-      }
-    }
-    
-    ```
-
-3. **Enable in Main**
-
-    ```java
-    @SpringBootApplication
-    @EnableConfigurationProperties(AppProperties.class)
-    public class SupplyChainMgmtHubApplication { … }
-    
-    ```
-
-4.  **Ensure [`application.properties`](http://application.properties) has below props**
-
-    ```jsx
-    spring.application.name=SupplyChainMgmtHub
-    
-    spring.datasource.url=${DATABASE_URL:jdbc:postgresql://localhost:5432/supply_chain_mgmt}
-    spring.datasource.username=${DATABASE_USERNAME:supply_chain_user}
-    spring.datasource.password=${DATABASE_PASSWORD:password}
-    
-    # JWT settings under the `app` prefix
-    app.jwt-secret=${JWT_SECRET:GqHHQD1hoGSuGSs4DGsWnw4KJuQOX0njvxwLXaHkAX0=}
-    # 8 hours exp time
-    app.jwt-expiration=28800000
-    
-    spring.jpa.hibernate.ddl-auto=update
-    spring.jpa.show-sql=true
-    spring.jpa.properties.hibernate.format_sql=true
-    # Log the parameter values bound to the SQL statements (DEBUG level)
-    logging.level.org.hibernate.SQL=DEBUG
-    # Log the JDBC parameters type binding (TRACE level for maximum detail)
-    logging.level.org.hibernate.type.descriptor.sql=TRAC
-    ```
-
-
-### 3. JPA Entities & Repositories
-
-Use Lombok + JPA for concise, type‑safe models:
-
-```java
-package com.jpdevland.SupplyChainMgmtHub.backend.model;
-
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.Set;
-
-@Entity
-@Table(name = "users")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class User {
-    @Id
-    @GeneratedValue
-    private Long id;
-    @Column(nullable = false) private String name;
-    @Column(unique = true, nullable = false) private String username;
-    @Column(nullable = false) private String password;
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
-    private Set<Role> roles;}
-
+```bash
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+sudo systemctl enable postgresql
+sudo systemctl start postgresql
 ```
 
-```java
-@Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-  Optional<User> findByEmail(String email);
-}
+---
+
+## 2. Create Database and User
+
+Access the PostgreSQL shell and execute the following SQL commands:
+
+```sql
+-- Drop the database and user if they already exist
+DROP DATABASE IF EXISTS supply_chain_mgmt;
+DROP ROLE IF EXISTS supply_chain_user;
+
+-- Create a new user with a password
+CREATE USER supply_chain_user WITH PASSWORD 'password';
+
+-- Create a new database and assign ownership to the new user
+CREATE DATABASE supply_chain_mgmt OWNER supply_chain_user;
+
+-- Connect to the newly created database
+\c supply_chain_mgmt
+
+-- Grant usage and create privileges on the public schema
+GRANT USAGE, CREATE ON SCHEMA public TO supply_chain_user;
+
+-- Grant privileges on all existing tables, sequences, and functions in the public schema
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO supply_chain_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO supply_chain_user;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO supply_chain_user;
+
+-- Grant privileges on all future tables, sequences, and functions created in the public schema
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO supply_chain_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON SEQUENCES TO supply_chain_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON FUNCTIONS TO supply_chain_user;
+
+-- Exit the PostgreSQL session
+\q
 ```
 
-### 4. DTOs & MapStruct
+> ⚠️ **Note**: This is a one-time setup. You do not need to repeat these steps every time you start the server. However, if you encounter any issues related to database privileges (e.g., when adding new tables or columns), revisiting these steps can help resolve those issues.
 
-Generate compile‑time mappers for Entities ↔ DTOs:
+---
 
-1. **Define DTO**
+## 3. Insert Initial Admin and Test Users
 
-    ```java
-    package com.jpdevland.SupplyChainMgmtHub.backend.dto;
-    
-    import lombok.Data;
-    
-    import javax.management.relation.Role;
-    
-    @Data
-    public class UserDTO {
-        private Long id;
-        private String name;
-        private String username;
-        private Role role;
-    }
-    ```
+Once the server is running for the first time, the user table will be empty. To manually insert the initial admin and test users, execute the following SQL command:
 
-2. **Create Mapper**
+```sql
+INSERT INTO users (id, available, enabled, name, password, username)
+VALUES
+  (2, 'f', 't', 'Cook', '$2a$10$Ga7IqcNf6u5e5lKtimfHEegQl8aq71eP8qUbiISkQSwjGN9Y7DxXe', 'cook@test.dev'),
+  (4, 'f', 't', 'User', '$2a$10$VEi/bJ1Gg95YW2RJBaSJROB5H/qW0OLtUN/YgpSfIE/5c8iJmqJhu', 'user@test.dev'),
+  (1, 't', 't', 'admin', '$2a$10$DLryrvF.EAtSm7FZGweTPOZifCe6oGdWm9xYBzmhNimj/OmZJLPGq', 'admin@test.dev'),
+  (3, 't', 't', 'Agent', '$2a$10$lp71h10R9Tfc7vEWWDDJ8.FSRbEP3kxbhIOyrlkO99aMvGP/bizKe', 'agent@test.dev');
+```
 
-    ```java
-    package com.jpdevland.SupplyChainMgmtHub.backend.mapper;
-    
-    import com.jpdevland.SupplyChainMgmtHub.backend.dto.UserDTO;
-    import com.jpdevland.SupplyChainMgmtHub.backend.model.User;
-    import org.mapstruct.Mapper;
-    
-    @Mapper(componentModel = "spring")
-    public interface UserMapper {
-        UserDTO toDto(User user);
-        User toEntity(UserDTO dto);
-    }
-    ```
+Note: password for all the users(cook, admin, agent, user) is `password` only
+
+This step ensures that you have an admin user and some test users available for initial login and testing.
