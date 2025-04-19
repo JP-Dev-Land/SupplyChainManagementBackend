@@ -59,6 +59,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/food-items/**").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/me/**").authenticated()
+                        .requestMatchers("/api/products/**").authenticated()
                         .anyRequest().authenticated() // Secure everything else
                 )
                 .userDetailsService(userDetailsService)

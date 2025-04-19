@@ -1,6 +1,6 @@
 package com.jpdevland.supply_chain_mgmt.backend.controller;
 
-import com.jpdevland.supply_chain_mgmt.backend.dto.*;
+import com.jpdevland.supply_chain_mgmt.backend.dto.user.*;
 import com.jpdevland.supply_chain_mgmt.backend.service.UserService;
 import com.jpdevland.supply_chain_mgmt.backend.service.AnalyticsService; // Add import
 import com.jpdevland.supply_chain_mgmt.backend.service.impl.UserDetailsImpl;

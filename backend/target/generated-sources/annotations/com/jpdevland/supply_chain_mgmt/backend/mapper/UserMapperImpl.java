@@ -1,6 +1,6 @@
 package com.jpdevland.supply_chain_mgmt.backend.mapper;
 
-import com.jpdevland.supply_chain_mgmt.backend.dto.UserDTO;
+import com.jpdevland.supply_chain_mgmt.backend.dto.user.UserDTO;
 import com.jpdevland.supply_chain_mgmt.backend.model.Role;
 import com.jpdevland.supply_chain_mgmt.backend.model.User;
 import java.util.LinkedHashSet;
@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-04-17T23:14:18+0530",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.42.0.z20250331-1358, environment: Java 21.0.6 (Eclipse Adoptium)"
+    date = "2025-04-19T21:21:04+0530",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 23.0.1 (Oracle Corporation)"
 )
 @Component
 public class UserMapperImpl implements UserMapper {

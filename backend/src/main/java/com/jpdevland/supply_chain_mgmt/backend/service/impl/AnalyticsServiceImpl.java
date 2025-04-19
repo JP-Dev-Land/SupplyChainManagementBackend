@@ -1,6 +1,6 @@
 package com.jpdevland.supply_chain_mgmt.backend.service.impl;
 
-import com.jpdevland.supply_chain_mgmt.backend.dto.AdminAnalyticsDTO;
+import com.jpdevland.supply_chain_mgmt.backend.dto.user.AdminAnalyticsDTO;
 import com.jpdevland.supply_chain_mgmt.backend.model.Role;
 import com.jpdevland.supply_chain_mgmt.backend.model.User;
 import com.jpdevland.supply_chain_mgmt.backend.repo.UserRepository;
@@ -29,7 +29,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         // Calculate User Counts
         long totalUsers = allUsers.size();
         long totalCooks = allUsers.stream()
-                .filter(user -> user.getRoles().contains(Role.ROLE_COOK))
+                .filter(user -> user.getRoles().contains(Role.ROLE_SELLER))
                 .count();
         long totalDeliveryAgents = allUsers.stream()
                 .filter(user -> user.getRoles().contains(Role.ROLE_DELIVERY_AGENT))

@@ -1,6 +1,6 @@
 package com.jpdevland.supply_chain_mgmt.backend.service.impl;
 
-import com.jpdevland.supply_chain_mgmt.backend.dto.*;
+import com.jpdevland.supply_chain_mgmt.backend.dto.user.*;
 import com.jpdevland.supply_chain_mgmt.backend.exception.InvalidOperationException;
 import com.jpdevland.supply_chain_mgmt.backend.exception.ResourceNotFoundException;
 import com.jpdevland.supply_chain_mgmt.backend.model.Role;

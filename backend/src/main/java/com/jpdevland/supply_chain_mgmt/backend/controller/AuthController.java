@@ -1,8 +1,8 @@
 package com.jpdevland.supply_chain_mgmt.backend.controller;
 
-import com.jpdevland.supply_chain_mgmt.backend.dto.AuthRequest;
-import com.jpdevland.supply_chain_mgmt.backend.dto.AuthResponse;
-import com.jpdevland.supply_chain_mgmt.backend.dto.RegisterRequest;
+import com.jpdevland.supply_chain_mgmt.backend.dto.user.AuthRequest;
+import com.jpdevland.supply_chain_mgmt.backend.dto.user.AuthResponse;
+import com.jpdevland.supply_chain_mgmt.backend.dto.user.RegisterRequest;
 import com.jpdevland.supply_chain_mgmt.backend.model.Role;
 import com.jpdevland.supply_chain_mgmt.backend.repo.UserRepository;
 import com.jpdevland.supply_chain_mgmt.backend.utils.JwtUtil;

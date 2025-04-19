@@ -1,8 +1,8 @@
 package com.jpdevland.supply_chain_mgmt.backend.controller;
 
-import com.jpdevland.supply_chain_mgmt.backend.dto.UpdateProfileRequestDTO;
-import com.jpdevland.supply_chain_mgmt.backend.dto.UserProfileDTO;
-import com.jpdevland.supply_chain_mgmt.backend.dto.UpdateAvailabilityRequestDTO; // Add import
+import com.jpdevland.supply_chain_mgmt.backend.dto.user.UpdateProfileRequestDTO;
+import com.jpdevland.supply_chain_mgmt.backend.dto.user.UserProfileDTO;
+import com.jpdevland.supply_chain_mgmt.backend.dto.user.UpdateAvailabilityRequestDTO; // Add import
 import com.jpdevland.supply_chain_mgmt.backend.service.UserService;
 import com.jpdevland.supply_chain_mgmt.backend.service.impl.UserDetailsImpl; // Assuming from Phase 3
 import jakarta.validation.Valid; // Add import
