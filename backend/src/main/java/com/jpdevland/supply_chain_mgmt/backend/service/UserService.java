@@ -1,5 +1,5 @@
 package com.jpdevland.supply_chain_mgmt.backend.service;
-import com.jpdevland.supply_chain_mgmt.backend.dto.*;
+import com.jpdevland.supply_chain_mgmt.backend.dto.user.*;
 
 import java.util.List;
 

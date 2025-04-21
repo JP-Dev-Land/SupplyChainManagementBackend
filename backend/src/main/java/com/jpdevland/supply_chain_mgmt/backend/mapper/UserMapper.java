@@ -1,6 +1,6 @@
 package com.jpdevland.supply_chain_mgmt.backend.mapper;
 
-import com.jpdevland.supply_chain_mgmt.backend.dto.UserDTO;
+import com.jpdevland.supply_chain_mgmt.backend.dto.user.UserDTO;
 import com.jpdevland.supply_chain_mgmt.backend.model.Role;
 import com.jpdevland.supply_chain_mgmt.backend.model.User;
 import org.mapstruct.AfterMapping;

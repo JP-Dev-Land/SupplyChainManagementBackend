@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 import java.util.List;
 
@@ -45,8 +46,10 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // --- Explicitly permit POST requests for login and register ---
+                        .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
+                        // --- Permit other public endpoints (Swagger, WebSocket) ---
                         .requestMatchers(
-                                "/api/auth/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
@@ -54,11 +57,14 @@ public class SecurityConfig {
                         ).permitAll()
                         // --- Add specific rule for route endpoint ---
                         .requestMatchers("/api/orders/route").authenticated()
+                        // --- Add specific rule for product AI images endpoint ---
+                        .requestMatchers(HttpMethod.POST, "/api/product-ai-images").authenticated()
                         // --- Keep existing authenticated rules ---
                         .requestMatchers("/api/orders/**").authenticated()
                         .requestMatchers("/api/food-items/**").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/me/**").authenticated()
+                        .requestMatchers("/api/products/**").authenticated()
                         .anyRequest().authenticated() // Secure everything else
                 )
                 .userDetailsService(userDetailsService)

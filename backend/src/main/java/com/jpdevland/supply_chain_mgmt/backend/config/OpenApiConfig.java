@@ -17,9 +17,9 @@ public class OpenApiConfig {
 
         return new OpenAPI()
                 .info(new Info()
-                        .title("Foody Heaven API")
+                        .title("Supply Chain Management API")
                         .version("v1")
-                        .description("API for Foody Heaven"))
+                        .description("API for Supply Chain Management"))
                 .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
                 .components(new Components()
                         .addSecuritySchemes(securitySchemeName,

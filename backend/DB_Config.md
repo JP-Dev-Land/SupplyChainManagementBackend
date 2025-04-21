@@ -13,6 +13,8 @@ sudo apt update
 sudo apt install postgresql postgresql-contrib
 sudo systemctl enable postgresql
 sudo systemctl start postgresql
+sudo -i -u postgres
+psql
 ```
 
 ---
@@ -63,12 +65,25 @@ Once the server is running for the first time, the user table will be empty. To 
 ```sql
 INSERT INTO users (id, available, enabled, name, password, username)
 VALUES
-  (2, 'f', 't', 'Cook', '$2a$10$Ga7IqcNf6u5e5lKtimfHEegQl8aq71eP8qUbiISkQSwjGN9Y7DxXe', 'cook@test.dev'),
+  (2, 'f', 't', 'Seller', '$2a$10$Ga7IqcNf6u5e5lKtimfHEegQl8aq71eP8qUbiISkQSwjGN9Y7DxXe', 'seller@test.dev'),
   (4, 'f', 't', 'User', '$2a$10$VEi/bJ1Gg95YW2RJBaSJROB5H/qW0OLtUN/YgpSfIE/5c8iJmqJhu', 'user@test.dev'),
   (1, 't', 't', 'admin', '$2a$10$DLryrvF.EAtSm7FZGweTPOZifCe6oGdWm9xYBzmhNimj/OmZJLPGq', 'admin@test.dev'),
   (3, 't', 't', 'Agent', '$2a$10$lp71h10R9Tfc7vEWWDDJ8.FSRbEP3kxbhIOyrlkO99aMvGP/bizKe', 'agent@test.dev');
+
+-- Insert roles into the user_roles join table
+-- Assuming the user IDs generated are 1 (admin), 2 (seller), 3 (agent), 4 (user)
+-- Adjust IDs if your sequence generates different values
+INSERT INTO user_roles (user_id, role)
+VALUES
+  (1, 'ROLE_ADMIN'), -- Assign ROLE_ADMIN to admin user (ID 1)
+  (1, 'ROLE_USER'),  -- Admin is also a USER
+  (2, 'ROLE_SELLER'), -- Assign ROLE_SELLER to seller user (ID 2)
+  (2, 'ROLE_USER'),  -- Seller is also a USER
+  (3, 'ROLE_DELIVERY_AGENT'), -- Assign ROLE_DELIVERY_AGENT to agent user (ID 3)
+  (3, 'ROLE_USER'),  -- Agent is also a USER
+  (4, 'ROLE_USER');  -- Assign ROLE_USER to user user (ID 4)
 ```
 
-Note: password for all the users(cook, admin, agent, user) is `password` only
+Note: password for all the users(seller, admin, agent, user) is `password` only
 
 This step ensures that you have an admin user and some test users available for initial login and testing.

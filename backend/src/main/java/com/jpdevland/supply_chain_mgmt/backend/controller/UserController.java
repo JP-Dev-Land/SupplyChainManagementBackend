@@ -1,15 +1,17 @@
 package com.jpdevland.supply_chain_mgmt.backend.controller;
 
-import com.jpdevland.supply_chain_mgmt.backend.dto.UpdateProfileRequestDTO;
-import com.jpdevland.supply_chain_mgmt.backend.dto.UserProfileDTO;
-import com.jpdevland.supply_chain_mgmt.backend.dto.UpdateAvailabilityRequestDTO; // Add import
+import com.jpdevland.supply_chain_mgmt.backend.dto.user.UpdateProfileRequestDTO;
+import com.jpdevland.supply_chain_mgmt.backend.dto.user.UserProfileDTO;
+import com.jpdevland.supply_chain_mgmt.backend.dto.user.UpdateAvailabilityRequestDTO;
+import com.jpdevland.supply_chain_mgmt.backend.model.User;
 import com.jpdevland.supply_chain_mgmt.backend.service.UserService;
-import com.jpdevland.supply_chain_mgmt.backend.service.impl.UserDetailsImpl; // Assuming from Phase 3
-import jakarta.validation.Valid; // Add import
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize; // Add import
-import org.springframework.security.core.annotation.AuthenticationPrincipal; // Add import
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,8 +23,11 @@ public class UserController {
 
     // GET /api/users/me - Get current logged-in user's profile
     @GetMapping("/me")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<UserProfileDTO> getCurrentUserProfile(@AuthenticationPrincipal UserDetailsImpl currentUser) {
+    public ResponseEntity<UserProfileDTO> getCurrentUserProfile(@AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            // Handle case where principal is unexpectedly null (shouldn't happen if authenticated)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         UserProfileDTO profile = userService.getCurrentUserProfile(currentUser.getId());
         return ResponseEntity.ok(profile);
     }
@@ -31,7 +36,7 @@ public class UserController {
     @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserProfileDTO> updateCurrentUserProfile(
-            @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @AuthenticationPrincipal User currentUser,
             @Valid @RequestBody UpdateProfileRequestDTO request) {
         UserProfileDTO updatedProfile = userService.updateCurrentUserProfile(currentUser.getId(), request);
         return ResponseEntity.ok(updatedProfile);
@@ -42,7 +47,7 @@ public class UserController {
     @PreAuthorize("hasRole('DELIVERY_AGENT')") // Only delivery agents can set their availability
     public ResponseEntity<Void> updateMyAvailability(
             @Valid @RequestBody UpdateAvailabilityRequestDTO request,
-            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+            @AuthenticationPrincipal User currentUser) {
 
         userService.updateAvailability(currentUser.getId(), request.getAvailable(), currentUser.getId());
         return ResponseEntity.ok().build();
