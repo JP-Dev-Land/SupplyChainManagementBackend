@@ -31,15 +31,15 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<Page<ProductDTO>> getAllProducts(
-            @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int page,
+            @RequestParam(value = "page", defaultValue = "1", required = false) int page,
             @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int size,
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
             @RequestParam(value = "search", required = false) String searchTerm) {
 
-        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(page, size, sort);
+        // Adjust page to be zero-based for Spring Data JPA
+        Pageable pageable = PageRequest.of(page - 1, size, 
+                sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
 
         Page<ProductDTO> products = productService.getAllProducts(pageable, searchTerm);
         return ResponseEntity.ok(products);
@@ -56,7 +56,7 @@ public class ProductController {
     // --- Seller Endpoints ---
 
     @PostMapping
-    @PreAuthorize("hasRole('ROLE_SELLER')")
+    @PreAuthorize("hasAnyRole('ROLE_SELLER','ROLE_ADMIN')")
     public ResponseEntity<ProductDTO> createProduct(
             @Valid @RequestBody ProductCreateRequest createRequest,
             @AuthenticationPrincipal User sellerPrincipal // Get authenticated user (seller)
@@ -66,7 +66,7 @@ public class ProductController {
     }
 
     @PutMapping("/{productId}")
-    @PreAuthorize("hasRole('ROLE_SELLER')")
+    @PreAuthorize("hasAnyRole('ROLE_SELLER','ROLE_ADMIN')")
     public ResponseEntity<ProductDTO> updateProduct(
             @PathVariable Long productId,
             @Valid @RequestBody ProductCreateRequest updateRequest,

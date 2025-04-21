@@ -28,7 +28,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
         // Calculate User Counts
         long totalUsers = allUsers.size();
-        long totalCooks = allUsers.stream()
+        long totalSellers = allUsers.stream()
                 .filter(user -> user.getRoles().contains(Role.ROLE_SELLER))
                 .count();
         long totalDeliveryAgents = allUsers.stream()
@@ -43,7 +43,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         // Build the DTO
         return AdminAnalyticsDTO.builder()
                 .totalUsers(totalUsers)
-                .totalCooks(totalCooks)
+                .totalSellers(totalSellers)
                 .totalDeliveryAgents(totalDeliveryAgents)
                 .usersByRole(usersByRole)
                 .build();

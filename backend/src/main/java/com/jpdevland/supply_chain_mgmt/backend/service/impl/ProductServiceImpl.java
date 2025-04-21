@@ -1,15 +1,16 @@
-
 package com.jpdevland.supply_chain_mgmt.backend.service.impl;
 
 import com.jpdevland.supply_chain_mgmt.backend.dto.product.ProductCreateRequest;
 import com.jpdevland.supply_chain_mgmt.backend.dto.product.ProductDTO;
+import com.jpdevland.supply_chain_mgmt.backend.dto.product.ProductVariantDTO;
 import com.jpdevland.supply_chain_mgmt.backend.model.Product;
+import com.jpdevland.supply_chain_mgmt.backend.model.ProductVariant;
 import com.jpdevland.supply_chain_mgmt.backend.model.User;
 import com.jpdevland.supply_chain_mgmt.backend.exception.ResourceNotFoundException;
 import com.jpdevland.supply_chain_mgmt.backend.repo.ProductRepository;
 import com.jpdevland.supply_chain_mgmt.backend.repo.UserRepository;
 import com.jpdevland.supply_chain_mgmt.backend.service.ProductService;
-import com.jpdevland.supply_chain_mgmt.backend.utils.DtoMapper; // Assume a mapper utility exists
+import com.jpdevland.supply_chain_mgmt.backend.utils.DtoMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -17,7 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,15 +37,27 @@ public class ProductServiceImpl implements ProductService {
         User seller = userRepository.findById(sellerId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", sellerId));
 
-        // Basic mapping (Refine with variants, etc.)
         Product product = Product.builder()
                 .seller(seller)
                 .name(createRequest.getName())
                 .description(createRequest.getDescription())
                 .basePrice(createRequest.getBasePrice())
                 .available(createRequest.getAvailable())
+                .variants(new ArrayList<>())
                 .build();
-        // TODO: Map and associate variants if provided in createRequest
+
+        // Map and associate variants if provided
+        if (createRequest.getVariants() != null && !createRequest.getVariants().isEmpty()) {
+            for (ProductVariantDTO variantDTO : createRequest.getVariants()) {
+                ProductVariant variant = ProductVariant.builder()
+                        .variantName(variantDTO.getVariantName())
+                        .priceModifier(variantDTO.getPriceModifier())
+                        .stockQuantity(variantDTO.getStockQuantity())
+                        .product(product) // Set the relationship back to the product
+                        .build();
+                product.getVariants().add(variant); // Adding the variant to the product's list
+            }
+        }
 
         Product savedProduct = productRepository.save(product);
         log.info("Product '{}' created with ID: {}", savedProduct.getName(), savedProduct.getId());
@@ -65,13 +78,13 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductDTO> getAllProducts(Pageable pageable, String searchTerm) {
         Page<Product> productPage;
         if (searchTerm != null && !searchTerm.isBlank()) {
-            // TODO: Implement proper search logic (e.g., across name, description)
-            // This is a simple name search example:
-            productPage = productRepository.findByNameContainingIgnoreCase(searchTerm, pageable);
+            // Implementing search logic across name and description
+            productPage = productRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(searchTerm, searchTerm, pageable);
         } else {
             productPage = productRepository.findAll(pageable);
         }
         log.debug("Fetching products page {} size {} with term '{}'", pageable.getPageNumber(), pageable.getPageSize(), searchTerm);
+        log.debug("Total products fetched: {}", productPage.getTotalElements());
         return productPage.map(dtoMapper::toProductDTO); // Map page content to DTOs
     }
 
@@ -96,7 +109,6 @@ public class ProductServiceImpl implements ProductService {
 
         // Authorization check: Ensure the user updating is the seller or an admin
         if (!product.getSeller().getId().equals(sellerId)) {
-            // Throw AccessDeniedException or handle appropriately - Spring Security @PreAuthorize is better
             throw new org.springframework.security.access.AccessDeniedException("User not authorized to update this product");
         }
 
@@ -105,7 +117,33 @@ public class ProductServiceImpl implements ProductService {
         product.setDescription(updateRequest.getDescription());
         product.setBasePrice(updateRequest.getBasePrice());
         product.setAvailable(updateRequest.getAvailable());
-        // TODO: Implement logic to update variants (add new, update existing, remove old)
+
+        // Handle variants: Add new, update existing, remove old
+        if (updateRequest.getVariants() != null) {
+            List<ProductVariant> existingVariants = product.getVariants();
+
+            // Update or add new variants
+            for (ProductVariantDTO variantDTO : updateRequest.getVariants()) {
+                ProductVariant variant = existingVariants.stream()
+                        .filter(v -> v.getVariantName().equals(variantDTO.getVariantName()))
+                        .findFirst()
+                        .orElseGet(() -> {
+                            ProductVariant newVariant = ProductVariant.builder()
+                                    .product(product)
+                                    .variantName(variantDTO.getVariantName())
+                                    .build();
+                            existingVariants.add(newVariant);
+                            return newVariant;
+                        });
+
+                variant.setPriceModifier(variantDTO.getPriceModifier());
+                variant.setStockQuantity(variantDTO.getStockQuantity());
+            }
+
+            // Remove variants not in the update request
+            existingVariants.removeIf(variant -> updateRequest.getVariants().stream()
+                    .noneMatch(v -> v.getVariantName().equals(variant.getVariantName())));
+        }
 
         Product updatedProduct = productRepository.save(product);
         log.info("Product ID: {} updated by seller ID: {}", productId, sellerId);

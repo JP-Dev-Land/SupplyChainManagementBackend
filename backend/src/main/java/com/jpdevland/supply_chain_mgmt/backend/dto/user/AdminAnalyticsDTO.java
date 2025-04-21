@@ -9,7 +9,7 @@ import java.util.Map;
 @Builder
 public class AdminAnalyticsDTO {
     private long totalUsers;
-    private long totalCooks;
+    private long totalSellers;
     private long totalDeliveryAgents;
     private Map<String, Long> usersByRole;    // e.g., {"ROLE_USER": 100, "ROLE_ADMIN": 5}
     // Add more complex analytics later if needed:
