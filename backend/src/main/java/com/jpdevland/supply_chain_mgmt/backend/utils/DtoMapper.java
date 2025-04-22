@@ -5,10 +5,13 @@ import com.jpdevland.supply_chain_mgmt.backend.dto.order.OrderDTO;
 import com.jpdevland.supply_chain_mgmt.backend.dto.order.OrderItemDTO;
 import com.jpdevland.supply_chain_mgmt.backend.dto.product.ProductDTO;
 import com.jpdevland.supply_chain_mgmt.backend.dto.product.ProductVariantDTO;
+import com.jpdevland.supply_chain_mgmt.backend.dto.product.ProductReviewDTO;
+import com.jpdevland.supply_chain_mgmt.backend.dto.productreturn.ProductReturnDTO;
 import com.jpdevland.supply_chain_mgmt.backend.dto.user.UserDTO;
+import com.jpdevland.supply_chain_mgmt.backend.dto.support.SupportTicketDTO;
+import com.jpdevland.supply_chain_mgmt.backend.dto.support.TicketResponseDTO;
 import com.jpdevland.supply_chain_mgmt.backend.model.*; // Import all entities
 import org.springframework.stereotype.Component;
-
 
 import java.util.Collections;
 import java.util.stream.Collectors;
@@ -46,7 +49,6 @@ public class DtoMapper {
         return dto;
     }
 
-
     public ProductDTO toProductDTO(Product product) {
         if (product == null) return null;
         ProductDTO dto = new ProductDTO();
@@ -74,57 +76,68 @@ public class DtoMapper {
         return dto;
     }
 
-//    public OrderItemDTO toOrderItemDTO(OrderItem item) {
-//        if (item == null) return null;
-//        OrderItemDTO dto = new OrderItemDTO();
-//        dto.setId(item.getId());
-//        if (item.getProductVariant() != null) {
-//            dto.setProductVariantId(item.getProductVariant().getId());
-//            dto.setVariantName(item.getProductVariant().getVariantName());
-//            // Include base product name too
-//            if (item.getProductVariant().getProduct() != null) {
-//                dto.setProductName(item.getProductVariant().getProduct().getName());
-//            }
-//        }
-//        dto.setQuantity(item.getQuantity());
-//        dto.setPriceAtOrder(item.getPriceAtOrder());
-//        return dto;
-//    }
+    public OrderDTO toOrderDTO(Order order) {
+        if (order == null) return null;
+        OrderDTO dto = new OrderDTO();
+        dto.setId(order.getId());
+        if (order.getCustomer() != null) {
+            dto.setCustomerId(order.getCustomer().getId());
+            dto.setCustomerName(order.getCustomer().getName());
+        }
+        if (order.getSeller() != null) {
+            dto.setSellerId(order.getSeller().getId());
+            dto.setSellerName(order.getSeller().getName());
+        }
+        dto.setOrderStatus(order.getOrderStatus());
+        dto.setTotalAmount(order.getTotalAmount());
+        dto.setDeliveryCity(order.getDeliveryCity());
+        dto.setDeliveryLatitude(order.getDeliveryLatitude());
+        dto.setDeliveryLongitude(order.getDeliveryLongitude());
+        dto.setDeliveryPostalCode(order.getDeliveryPostalCode());
+        dto.setDeliveryStreet(order.getDeliveryStreet());
+        dto.setCreatedAt(order.getCreatedAt());
+        dto.setUpdatedAt(order.getUpdatedAt());
 
+        if (order.getOrderItems() != null) {
+            dto.setOrderItems(order.getOrderItems().stream()
+                    .map(this::toOrderItemDTO)
+                    .collect(Collectors.toList()));
+        } else {
+            dto.setOrderItems(Collections.emptyList());
+        }
+        // TODO: Map payments, tracking info if needed in the main Order DTO
+        return dto;
+    }
 
-//    public OrderDTO toOrderDTO(Order order) {
-//        if (order == null) return null;
-//        OrderDTO dto = new OrderDTO();
-//        dto.setId(order.getId());
-//        if (order.getCustomer() != null) {
-//            dto.setCustomerId(order.getCustomer().getId());
-//            dto.setCustomerName(order.getCustomer().getName());
-//        }
-//        if (order.getSeller() != null) {
-//            dto.setSellerId(order.getSeller().getId());
-//            dto.setSellerName(order.getSeller().getName());
-//        }
-//        dto.setOrderStatus(order.getOrderStatus());
-//        dto.setTotalAmount(order.getTotalAmount());
-//        dto.setDeliveryCity(order.getDeliveryCity());
-//        dto.setDeliveryLatitude(order.getDeliveryLatitude());
-//        dto.setDeliveryLongitude(order.getDeliveryLongitude());
-//        dto.setDeliveryPostalCode(order.getDeliveryPostalCode());
-//        dto.setDeliveryStreet(order.getDeliveryStreet());
-//        dto.setCreatedAt(order.getCreatedAt());
-//        dto.setUpdatedAt(order.getUpdatedAt());
-//
-//        if (order.getOrderItems() != null) {
-//            dto.setOrderItems(order.getOrderItems().stream()
-//                    .map(this::toOrderItemDTO)
-//                    .collect(Collectors.toList()));
-//        } else {
-//            dto.setOrderItems(Collections.emptyList());
-//        }
-//        // TODO: Map payments, tracking info if needed in the main Order DTO
-//        return dto;
-//    }
+    public OrderItemDTO toOrderItemDTO(OrderItem item) {
+        if (item == null) return null;
+        OrderItemDTO dto = new OrderItemDTO();
+        dto.setId(item.getId());
+        if (item.getProductVariant() != null) {
+            dto.setProductVariantId(item.getProductVariant().getId());
+            dto.setVariantName(item.getProductVariant().getVariantName());
+            // Include base product name too
+            if (item.getProductVariant().getProduct() != null) {
+                dto.setProductName(item.getProductVariant().getProduct().getName());
+            }
+        }
+        dto.setQuantity(item.getQuantity());
+        dto.setPriceAtOrder(item.getPriceAtOrder());
+        return dto;
+    }
 
+    public ProductReviewDTO toProductReviewDTO(ProductReview review) {
+        if (review == null) return null;
+        ProductReviewDTO dto = new ProductReviewDTO();
+        dto.setId(review.getId());
+        dto.setProductId(review.getProduct().getId());
+        dto.setCustomerId(review.getCustomer().getId());
+        dto.setCustomerName(review.getCustomer().getName());
+        dto.setRating(review.getRating());
+        dto.setReview(review.getReview());
+        dto.setReviewDate(review.getReviewDate());
+        return dto;
+    }
 
 //    public AiImageDTO toAiImageDTO(ProductAiImage image) {
 //        if (image == null) return null;
@@ -137,6 +150,18 @@ public class DtoMapper {
 //        dto.setGeneratedAt(image.getGeneratedAt());
 //        return dto;
 //    }
+
+
+    public ProductReturnDTO toProductReturnDTO(ProductReturn productReturn) {
+        if (productReturn == null) return null;
+        ProductReturnDTO dto = new ProductReturnDTO();
+        dto.setId(productReturn.getId());
+        dto.setReason(productReturn.getReason());
+        dto.setStatus(productReturn.getStatus());
+        dto.setCreatedAt(productReturn.getCreatedAt());
+        dto.setUpdatedAt(productReturn.getUpdatedAt());
+        return dto;
+    }
 
     // Add mappers for other DTOs/Entities as required...
 }
